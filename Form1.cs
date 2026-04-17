@@ -28,6 +28,7 @@ namespace Checkers
         {
             InitializeComponent();
             CreateBoard();
+            SetUpPieces();
         }
 
         void CreateBoard()
@@ -53,7 +54,30 @@ namespace Checkers
             }
         }
 
-        
+        void SetUpPieces()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((i + j) % 2 == 1)
+                    {
+                        if (i < 3)
+                        {
+                            board[i, j] = 2; // Black piece
+                            P[i, j].Image = Properties.Resources.B;
+                        }
+                        else if (i > 4)
+                        {
+                            board[i, j] = 1; // Red piece   
+                            P[i, j].Image = Properties.Resources.R;
+                        }
+                    }
+                }
+            }
+        }
+
+       
     }
 }
 
