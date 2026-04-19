@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Checkers
 {
     public partial class Form1 : Form
     {
-
         private void Form1_Load(object sender, EventArgs e)
         { }
 
@@ -29,11 +22,16 @@ namespace Checkers
             InitializeComponent();
             CreateBoard();
             SetupPieces();
+
+            this.Text = "Red's Turn"; // shows whose turn it is
+            this.ClientSize = new Size(520, 520); // window fits board
         }
 
         void CreateBoard()
         {
             int size = 60;
+            int offsetX = 20;
+            int offsetY = 20;
 
             for (int i = 0; i < 8; i++)
             {
@@ -42,8 +40,8 @@ namespace Checkers
                     P[i, j] = new PictureBox();
                     P[i, j].Width = size;
                     P[i, j].Height = size;
-                    P[i, j].Left = j * size;
-                    P[i, j].Top = i * size;
+                    P[i, j].Left = j * size + offsetX;
+                    P[i, j].Top = i * size + offsetY;
 
                     P[i, j].BackColor = (i + j) % 2 == 0 ? Color.White : Color.Black;
                     P[i, j].SizeMode = PictureBoxSizeMode.Zoom;
@@ -62,6 +60,8 @@ namespace Checkers
             {
                 for (int j = 0; j < 8; j++)
                 {
+                    board[i, j] = 0;
+
                     if ((i + j) % 2 == 1)
                     {
                         if (i < 3)
@@ -86,38 +86,51 @@ namespace Checkers
             int row = (int)clicked.Tag / 8;
             int col = (int)clicked.Tag % 8;
 
+            // selecting a piece
             if (selectedRow == -1)
             {
+                if (board[row, col] == 0)
+                    return;
+
                 if (board[row, col] == (isRedTurn ? 1 : 2) ||
                     board[row, col] == (isRedTurn ? 3 : 4))
                 {
                     selectedRow = row;
                     selectedCol = col;
+
+                    ResetBoardColors();
+                    P[row, col].BackColor = Color.Yellow; // highlight
                 }
             }
             else
             {
                 TryMove(selectedRow, selectedCol, row, col);
+
                 selectedRow = -1;
                 selectedCol = -1;
+
+                ResetBoardColors();
             }
         }
 
         void TryMove(int sr, int sc, int dr, int dc)
         {
             if (!IsValidMove(sr, sc, dr, dc))
+            {
+                MessageBox.Show("Invalid move");
                 return;
+            }
 
             int piece = board[sr, sc];
 
-            // Move piece
+            // move piece
             board[dr, dc] = piece;
             board[sr, sc] = 0;
 
             P[dr, dc].Image = P[sr, sc].Image;
             P[sr, sc].Image = null;
 
-            // Capture
+            // capture
             if (Math.Abs(dr - sr) == 2)
             {
                 int midRow = (sr + dr) / 2;
@@ -127,14 +140,22 @@ namespace Checkers
                 P[midRow, midCol].Image = null;
             }
 
-            // King promotion
+            // king promotion (with visuals)
             if (dr == 0 && piece == 1)
+            {
                 board[dr, dc] = 3;
+                P[dr, dc].Image = MakeTransparent(new Bitmap(Properties.Resources.RK));
+            }
 
             if (dr == 7 && piece == 2)
+            {
                 board[dr, dc] = 4;
+                P[dr, dc].Image = MakeTransparent(new Bitmap(Properties.Resources.BK));
+            }
 
             isRedTurn = !isRedTurn;
+
+            this.Text = isRedTurn ? "Red's Turn" : "Black's Turn";
         }
 
         bool IsValidMove(int sr, int sc, int dr, int dc)
@@ -146,14 +167,11 @@ namespace Checkers
                 return false;
 
             int piece = board[sr, sc];
-
             int direction = (piece == 1) ? -1 : 1;
 
-            // King can move both directions
             if (piece == 3 || piece == 4)
                 direction = 0;
 
-            // Normal move
             if (Math.Abs(dr - sr) == 1 && Math.Abs(dc - sc) == 1)
             {
                 if (piece == 3 || piece == 4)
@@ -163,7 +181,6 @@ namespace Checkers
                     return true;
             }
 
-            // Jump move
             if (Math.Abs(dr - sr) == 2 && Math.Abs(dc - sc) == 2)
             {
                 int midRow = (sr + dr) / 2;
@@ -171,8 +188,7 @@ namespace Checkers
 
                 int midPiece = board[midRow, midCol];
 
-                if (midPiece != 0 && midPiece != piece &&
-                    !(IsSameTeam(piece, midPiece)))
+                if (midPiece != 0 && midPiece != piece && !IsSameTeam(piece, midPiece))
                 {
                     if (piece == 3 || piece == 4)
                         return true;
@@ -196,14 +212,21 @@ namespace Checkers
             return false;
         }
 
+        void ResetBoardColors()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    P[i, j].BackColor = (i + j) % 2 == 0 ? Color.White : Color.Black;
+                }
+            }
+        }
+
         Bitmap MakeTransparent(Bitmap bmp)
         {
             bmp.MakeTransparent(Color.White);
             return bmp;
         }
     }
-
-
 }
-
-

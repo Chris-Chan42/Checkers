@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37012.4 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkers", "Checkers.csproj", "{AE7AB82D-ED7E-4F8C-A2EF-0F1911A6AAAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckersTests", "..\CheckersTests\CheckersTests.csproj", "{A378EA77-2573-49CE-AF43-BEA5DE6DB917}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkers.Core", "..\Checkers.Core\Checkers.Core.csproj", "{A496DFEE-0B2B-4F85-A60C-8A80A9B6FEF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{AE7AB82D-ED7E-4F8C-A2EF-0F1911A6AAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE7AB82D-ED7E-4F8C-A2EF-0F1911A6AAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE7AB82D-ED7E-4F8C-A2EF-0F1911A6AAAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A378EA77-2573-49CE-AF43-BEA5DE6DB917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A378EA77-2573-49CE-AF43-BEA5DE6DB917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A378EA77-2573-49CE-AF43-BEA5DE6DB917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A378EA77-2573-49CE-AF43-BEA5DE6DB917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A496DFEE-0B2B-4F85-A60C-8A80A9B6FEF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A496DFEE-0B2B-4F85-A60C-8A80A9B6FEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A496DFEE-0B2B-4F85-A60C-8A80A9B6FEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A496DFEE-0B2B-4F85-A60C-8A80A9B6FEF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
