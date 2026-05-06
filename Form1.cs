@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -22,6 +23,8 @@ namespace Checkers
             InitializeComponent();
             CreateBoard();
             SetupPieces();
+
+            
 
             this.Text = "Red's Turn"; // shows whose turn it is
             this.ClientSize = new Size(520, 520); // window fits board
@@ -113,7 +116,7 @@ namespace Checkers
             }
         }
 
-        void TryMove(int sr, int sc, int dr, int dc)
+        public void TryMove(int sr, int sc, int dr, int dc)
         {
             if (!IsValidMove(sr, sc, dr, dc))
             {
@@ -156,6 +159,13 @@ namespace Checkers
             isRedTurn = !isRedTurn;
 
             this.Text = isRedTurn ? "Red's Turn" : "Black's Turn";
+
+
+            if (!isRedTurn) // black (computer)
+            {
+                MakeComputerMove();
+            }
+
         }
 
         bool IsValidMove(int sr, int sc, int dr, int dc)
@@ -227,6 +237,46 @@ namespace Checkers
         {
             bmp.MakeTransparent(Color.White);
             return bmp;
+        }
+
+        Random rand = new Random();
+
+        public List<(int sr, int sc, int dr, int dc)> GetAllValidMoves(bool forRed)
+        {
+            var moves = new List<(int, int, int, int)>();
+
+            for (int sr = 0; sr < 8; sr++)
+            {
+                for (int sc = 0; sc < 8; sc++)
+                {
+                    int piece = board[sr, sc];
+                    if (piece == 0) continue;
+
+                    bool isRedPiece = (piece == 1 || piece == 3);
+                    if (isRedPiece != forRed) continue;
+
+                    for (int dr = 0; dr < 8; dr++)
+                    {
+                        for (int dc = 0; dc < 8; dc++)
+                        {
+                            if (IsValidMove(sr, sc, dr, dc))
+                                moves.Add((sr, sc, dr, dc));
+                        }
+                    }
+
+                }
+            }
+            return moves;
+        }
+
+        public void MakeComputerMove()
+        {
+            var moves = GetAllValidMoves(false);
+            if (moves.Count == 0)
+                return;
+            var random = new Random();
+            var move = moves[random.Next(moves.Count)];
+            TryMove(move.sr, move.sc, move.dr, move.dc);
         }
     }
 }
