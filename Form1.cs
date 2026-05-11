@@ -29,6 +29,7 @@ namespace Checkers
             this.ClientSize = new Size(520, 520);
         }
 
+        // creates the visual checkerboard using PictureBoxes
         void CreateBoard()
         {
             int size = 60;
@@ -60,6 +61,7 @@ namespace Checkers
             }
         }
 
+        // places the starting checker pieces and images
         void SetupPieces()
         {
             for (int i = 0; i < 8; i++)
@@ -209,6 +211,7 @@ namespace Checkers
             }
         }
 
+        // checks if either player has lost all pieces
         void CheckWinner()
         {
             bool redExists = false;
@@ -356,6 +359,7 @@ namespace Checkers
             return moves;
         }
 
+        // computer player prioritizes captures before random moves
         public void MakeComputerMove()
         {
             var moves = GetAllValidMoves(false);

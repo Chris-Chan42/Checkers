@@ -8,6 +8,7 @@
         SetupPieces();
     }
 
+    // places all starting pieces on the board
     public void SetupPieces()
     {
         for (int i = 0; i < 8; i++)
@@ -27,6 +28,7 @@
         }
     }
 
+    // attempts to move a piece if the move is valid
     public void TryMove(int sr, int sc, int dr, int dc)
     {
         if (!IsValidMove(sr, sc, dr, dc))
@@ -53,6 +55,7 @@
         isRedTurn = !isRedTurn;
     }
 
+    // checks whether a move follows checkers rules
     public bool IsValidMove(int sr, int sc, int dr, int dc)
     {
         if (dr < 0 || dr >= 8 || dc < 0 || dc >= 8)
@@ -95,6 +98,7 @@
         return false;
     }
 
+    // returns true if both pieces belong to the same player
     private bool IsSameTeam(int a, int b)
     {
         if ((a == 1 || a == 3) && (b == 1 || b == 3))
