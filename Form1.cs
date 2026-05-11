@@ -99,6 +99,7 @@ namespace Checkers
             int row = (int)clicked.Tag / 8;
             int col = (int)clicked.Tag % 8;
 
+            // no piece selected yet
             if (selectedRow == -1)
             {
                 if (board[row, col] == 0)
@@ -116,6 +117,26 @@ namespace Checkers
             }
             else
             {
+                // clicking another friendly piece changes selection
+                if (board[row, col] == (isRedTurn ? 1 : 2) ||
+                    board[row, col] == (isRedTurn ? 3 : 4))
+                {
+                    selectedRow = row;
+                    selectedCol = col;
+
+                    ResetBoardColors();
+                    P[row, col].BackColor = Color.Yellow;
+
+                    return;
+                }
+
+                // invalid move keeps selection active
+                if (!IsValidMove(selectedRow, selectedCol, row, col))
+                {
+                    MessageBox.Show("Invalid move");
+                    return;
+                }
+
                 TryMove(selectedRow, selectedCol, row, col);
 
                 selectedRow = -1;
@@ -300,7 +321,7 @@ namespace Checkers
 
         Random rand = new Random();
 
-        public List<(int sr, int sc, int dr, int dc)> GetAllValidMoves(bool forRed)
+        public List<(int, int, int, int)> GetAllValidMoves(bool forRed)
         {
             var moves = new List<(int, int, int, int)>();
 
@@ -347,11 +368,11 @@ namespace Checkers
             }
 
             // prioritize capture moves
-            var captureMoves = new List<(int sr, int sc, int dr, int dc)>();
+            var captureMoves = new List<(int, int, int, int)>();
 
             foreach (var move in moves)
             {
-                if (Math.Abs(move.dr - move.sr) == 2)
+                if (Math.Abs(move.Item3 - move.Item1) == 2)
                 {
                     captureMoves.Add(move);
                 }
@@ -366,10 +387,10 @@ namespace Checkers
                 availableMoves[rand.Next(availableMoves.Count)];
 
             TryMove(
-                moveToPlay.sr,
-                moveToPlay.sc,
-                moveToPlay.dr,
-                moveToPlay.dc,
+                moveToPlay.Item1,
+                moveToPlay.Item2,
+                moveToPlay.Item3,
+                moveToPlay.Item4,
                 true);
         }
     }
