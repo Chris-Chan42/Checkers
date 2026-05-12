@@ -17,6 +17,7 @@ namespace Checkers
         int selectedCol = -1;
 
         bool isRedTurn = true;
+        bool gameOver = false;
 
         public Form1()
         {
@@ -24,12 +25,11 @@ namespace Checkers
             CreateBoard();
             SetupPieces();
 
-            
-
-            this.Text = "Red's Turn"; // shows whose turn it is
-            this.ClientSize = new Size(520, 520); // window fits board
+            this.Text = "Red's Turn";
+            this.ClientSize = new Size(520, 520);
         }
 
+        // creates the visual checkerboard using PictureBoxes
         void CreateBoard()
         {
             int size = 60;
@@ -46,7 +46,11 @@ namespace Checkers
                     P[i, j].Left = j * size + offsetX;
                     P[i, j].Top = i * size + offsetY;
 
-                    P[i, j].BackColor = (i + j) % 2 == 0 ? Color.White : Color.Black;
+                    P[i, j].BackColor =
+                        (i + j) % 2 == 0
+                        ? Color.White
+                        : Color.Black;
+
                     P[i, j].SizeMode = PictureBoxSizeMode.Zoom;
 
                     P[i, j].Tag = i * 8 + j;
@@ -57,6 +61,7 @@ namespace Checkers
             }
         }
 
+        // places the starting checker pieces and images
         void SetupPieces()
         {
             for (int i = 0; i < 8; i++)
@@ -69,13 +74,17 @@ namespace Checkers
                     {
                         if (i < 3)
                         {
-                            board[i, j] = 2; // black
-                            P[i, j].Image = MakeTransparent(new Bitmap(Properties.Resources.B));
+                            board[i, j] = 2;
+                            P[i, j].Image =
+                                MakeTransparent(
+                                    new Bitmap(Properties.Resources.B));
                         }
                         else if (i > 4)
                         {
-                            board[i, j] = 1; // red
-                            P[i, j].Image = MakeTransparent(new Bitmap(Properties.Resources.R));
+                            board[i, j] = 1;
+                            P[i, j].Image =
+                                MakeTransparent(
+                                    new Bitmap(Properties.Resources.R));
                         }
                     }
                 }
@@ -84,12 +93,15 @@ namespace Checkers
 
         void Cell_Click(object sender, EventArgs e)
         {
+            if (gameOver)
+                return;
+
             PictureBox clicked = sender as PictureBox;
 
             int row = (int)clicked.Tag / 8;
             int col = (int)clicked.Tag % 8;
 
-            // selecting a piece
+            // no piece selected yet
             if (selectedRow == -1)
             {
                 if (board[row, col] == 0)
@@ -102,11 +114,31 @@ namespace Checkers
                     selectedCol = col;
 
                     ResetBoardColors();
-                    P[row, col].BackColor = Color.Yellow; // highlight
+                    P[row, col].BackColor = Color.Yellow;
                 }
             }
             else
             {
+                // clicking another friendly piece changes selection
+                if (board[row, col] == (isRedTurn ? 1 : 2) ||
+                    board[row, col] == (isRedTurn ? 3 : 4))
+                {
+                    selectedRow = row;
+                    selectedCol = col;
+
+                    ResetBoardColors();
+                    P[row, col].BackColor = Color.Yellow;
+
+                    return;
+                }
+
+                // invalid move keeps selection active
+                if (!IsValidMove(selectedRow, selectedCol, row, col))
+                {
+                    MessageBox.Show("Invalid move");
+                    return;
+                }
+
                 TryMove(selectedRow, selectedCol, row, col);
 
                 selectedRow = -1;
@@ -116,8 +148,11 @@ namespace Checkers
             }
         }
 
-        public void TryMove(int sr, int sc, int dr, int dc)
+        public void TryMove(int sr, int sc, int dr, int dc, bool computerMove = false)
         {
+            if (gameOver)
+                return;
+
             if (!IsValidMove(sr, sc, dr, dc))
             {
                 MessageBox.Show("Invalid move");
@@ -126,7 +161,6 @@ namespace Checkers
 
             int piece = board[sr, sc];
 
-            // move piece
             board[dr, dc] = piece;
             board[sr, sc] = 0;
 
@@ -143,29 +177,69 @@ namespace Checkers
                 P[midRow, midCol].Image = null;
             }
 
-            // king promotion (with visuals)
+            // king promotion
             if (dr == 0 && piece == 1)
             {
                 board[dr, dc] = 3;
-                P[dr, dc].Image = MakeTransparent(new Bitmap(Properties.Resources.RK));
+                P[dr, dc].Image =
+                    MakeTransparent(
+                        new Bitmap(Properties.Resources.RK));
             }
 
             if (dr == 7 && piece == 2)
             {
                 board[dr, dc] = 4;
-                P[dr, dc].Image = MakeTransparent(new Bitmap(Properties.Resources.BK));
+                P[dr, dc].Image =
+                    MakeTransparent(
+                        new Bitmap(Properties.Resources.BK));
             }
+
+            // winner check
+            CheckWinner();
+
+            if (gameOver)
+                return;
 
             isRedTurn = !isRedTurn;
 
-            this.Text = isRedTurn ? "Red's Turn" : "Black's Turn";
+            this.Text =
+                isRedTurn ? "Red's Turn" : "Black's Turn";
 
-
-            if (!isRedTurn) // black (computer)
+            if (!isRedTurn && !computerMove)
             {
                 MakeComputerMove();
             }
+        }
 
+        // checks if either player has lost all pieces
+        void CheckWinner()
+        {
+            bool redExists = false;
+            bool blackExists = false;
+
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (board[i, j] == 1 || board[i, j] == 3)
+                        redExists = true;
+
+                    if (board[i, j] == 2 || board[i, j] == 4)
+                        blackExists = true;
+                }
+            }
+
+            if (!redExists)
+            {
+                gameOver = true;
+                MessageBox.Show("Black wins!");
+            }
+
+            else if (!blackExists)
+            {
+                gameOver = true;
+                MessageBox.Show("Red wins!");
+            }
         }
 
         bool IsValidMove(int sr, int sc, int dr, int dc)
@@ -182,7 +256,8 @@ namespace Checkers
             if (piece == 3 || piece == 4)
                 direction = 0;
 
-            if (Math.Abs(dr - sr) == 1 && Math.Abs(dc - sc) == 1)
+            if (Math.Abs(dr - sr) == 1 &&
+                Math.Abs(dc - sc) == 1)
             {
                 if (piece == 3 || piece == 4)
                     return true;
@@ -191,14 +266,17 @@ namespace Checkers
                     return true;
             }
 
-            if (Math.Abs(dr - sr) == 2 && Math.Abs(dc - sc) == 2)
+            if (Math.Abs(dr - sr) == 2 &&
+                Math.Abs(dc - sc) == 2)
             {
                 int midRow = (sr + dr) / 2;
                 int midCol = (sc + dc) / 2;
 
                 int midPiece = board[midRow, midCol];
 
-                if (midPiece != 0 && midPiece != piece && !IsSameTeam(piece, midPiece))
+                if (midPiece != 0 &&
+                    midPiece != piece &&
+                    !IsSameTeam(piece, midPiece))
                 {
                     if (piece == 3 || piece == 4)
                         return true;
@@ -213,10 +291,12 @@ namespace Checkers
 
         bool IsSameTeam(int a, int b)
         {
-            if ((a == 1 || a == 3) && (b == 1 || b == 3))
+            if ((a == 1 || a == 3) &&
+                (b == 1 || b == 3))
                 return true;
 
-            if ((a == 2 || a == 4) && (b == 2 || b == 4))
+            if ((a == 2 || a == 4) &&
+                (b == 2 || b == 4))
                 return true;
 
             return false;
@@ -228,7 +308,10 @@ namespace Checkers
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    P[i, j].BackColor = (i + j) % 2 == 0 ? Color.White : Color.Black;
+                    P[i, j].BackColor =
+                        (i + j) % 2 == 0
+                        ? Color.White
+                        : Color.Black;
                 }
             }
         }
@@ -241,7 +324,7 @@ namespace Checkers
 
         Random rand = new Random();
 
-        public List<(int sr, int sc, int dr, int dc)> GetAllValidMoves(bool forRed)
+        public List<(int, int, int, int)> GetAllValidMoves(bool forRed)
         {
             var moves = new List<(int, int, int, int)>();
 
@@ -250,33 +333,69 @@ namespace Checkers
                 for (int sc = 0; sc < 8; sc++)
                 {
                     int piece = board[sr, sc];
-                    if (piece == 0) continue;
 
-                    bool isRedPiece = (piece == 1 || piece == 3);
-                    if (isRedPiece != forRed) continue;
+                    if (piece == 0)
+                        continue;
+
+                    bool isRedPiece =
+                        (piece == 1 || piece == 3);
+
+                    if (isRedPiece != forRed)
+                        continue;
 
                     for (int dr = 0; dr < 8; dr++)
                     {
                         for (int dc = 0; dc < 8; dc++)
                         {
                             if (IsValidMove(sr, sc, dr, dc))
+                            {
                                 moves.Add((sr, sc, dr, dc));
+                            }
                         }
                     }
-
                 }
             }
+
             return moves;
         }
 
+        // computer player prioritizes captures before random moves
         public void MakeComputerMove()
         {
             var moves = GetAllValidMoves(false);
+
             if (moves.Count == 0)
+            {
+                gameOver = true;
+                MessageBox.Show("Red wins!");
                 return;
-            var random = new Random();
-            var move = moves[random.Next(moves.Count)];
-            TryMove(move.sr, move.sc, move.dr, move.dc);
+            }
+
+            // prioritize capture moves
+            var captureMoves = new List<(int, int, int, int)>();
+
+            foreach (var move in moves)
+            {
+                if (Math.Abs(move.Item3 - move.Item1) == 2)
+                {
+                    captureMoves.Add(move);
+                }
+            }
+
+            var availableMoves =
+                captureMoves.Count > 0
+                ? captureMoves
+                : moves;
+
+            var moveToPlay =
+                availableMoves[rand.Next(availableMoves.Count)];
+
+            TryMove(
+                moveToPlay.Item1,
+                moveToPlay.Item2,
+                moveToPlay.Item3,
+                moveToPlay.Item4,
+                true);
         }
     }
 }
